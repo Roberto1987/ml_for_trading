@@ -2,6 +2,8 @@ from src.ConfigManager import ConfigManager
 from src.Tools import load_resource, daily_returns
 import matplotlib.pyplot as plt
 
+
+
 config = ConfigManager('..\\src\\config.ini')
 df_dict = load_resource(config.source_folder)
 

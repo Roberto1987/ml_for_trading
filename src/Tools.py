@@ -1,6 +1,8 @@
 import os
 import pandas as p
 
+p.options.mode.chained_assignment = None
+
 
 # LOAD MULTIPLE CSV IN A FOLDER
 def load_resource(path):
@@ -8,7 +10,7 @@ def load_resource(path):
     print(os.getcwd())
     for i in list(os.listdir(path)):
         label = i.split('.')[0]
-        df_rames[label] = p.read_csv(path + '/' + i)
+        df_rames[label] = p.read_csv(path + '/' + i, index_col='Date')
         print('Source file {} loaded'.format(label))
     return df_rames
 
@@ -32,8 +34,8 @@ def multistock(df_list: dict, label: str):
 
 def daily_returns(df: p.DataFrame):
     print('Processing daily returns for dataframe : {}'.format(df.name))
-    df = (df[1:] / df[:-1].values) - 1
-    df[1] = 0
+    df[1:] = (df[1:] / df[:-1].values) - 1
+    df[0] = 0
     return df
 
 
@@ -58,6 +60,24 @@ def backfill_data(df: p.DataFrame):
     return df.fillna(method='bfill')
 
 
-# FILL EMPTY DATA FROM THE LASTVALID VALUE . -->
+# FILL EMPTY DATA FROM THE LAST VALID VALUE . -->
 def forwardfill_data(df: p.DataFrame):
     return df.fillna(method='ffill')
+
+
+# Evaluate a portfolio using daily returns
+
+def portfolio_eval(prices: p.DataFrame, allocations: list, investment, start_day=None, end_day=None):
+    if len(prices.iloc[0] != len(allocations)):
+        raise Exception('Allocation vector size:{}, number of columns: {}. '
+                        'Please correct the allocation vector'.format(len(allocations), prices.iloc[0]))
+
+    # Normalization:
+    prices = prices / prices.iloc[0]
+    # Allocate
+    prices = prices * allocations  # may require to multiply each column separately
+    # Money in
+    prices = prices * investment
+    # Portfolio value
+    portfolio = prices.sum(axis=1)
+    return prices
