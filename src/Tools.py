@@ -68,9 +68,9 @@ def forwardfill_data(df: p.DataFrame):
 # Evaluate a portfolio using daily returns
 
 def portfolio_eval(prices: p.DataFrame, allocations: list, investment, start_day=None, end_day=None):
-    if len(prices.iloc[0] != len(allocations)):
+    if len(prices.iloc[0]) != len(allocations):
         raise Exception('Allocation vector size:{}, number of columns: {}. '
-                        'Please correct the allocation vector'.format(len(allocations), prices.iloc[0]))
+                        'Please correct the allocation vector'.format(len(allocations), len(prices.iloc[0])))
 
     # Normalization:
     prices = prices / prices.iloc[0]
@@ -79,5 +79,5 @@ def portfolio_eval(prices: p.DataFrame, allocations: list, investment, start_day
     # Money in
     prices = prices * investment
     # Portfolio value
-    portfolio = prices.sum(axis=1)
+    prices['port_values'] = prices.sum(axis=1)
     return prices
