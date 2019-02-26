@@ -1,5 +1,6 @@
 import os
 import pandas as p
+import math
 
 p.options.mode.chained_assignment = None
 
@@ -65,12 +66,19 @@ def forwardfill_data(df: p.DataFrame):
     return df.fillna(method='ffill')
 
 
+def stochastic_sum(x: list):
+    return (sum(x) == 1)
+
 # Evaluate a portfolio using daily returns
 
 def portfolio_eval(prices: p.DataFrame, allocations: list, investment, start_day=None, end_day=None):
     if len(prices.iloc[0]) != len(allocations):
         raise Exception('Allocation vector size:{}, number of columns: {}. '
                         'Please correct the allocation vector'.format(len(allocations), len(prices.iloc[0])))
+
+    if not stochastic_sum(allocations):
+        raise Exception('Allocation of the portfolio is not sum to 1: please revise the allocation percentage')
+
 
     # Normalization:
     prices = prices / prices.iloc[0]
@@ -81,3 +89,26 @@ def portfolio_eval(prices: p.DataFrame, allocations: list, investment, start_day
     # Portfolio value
     prices['port_values'] = prices.sum(axis=1)
     return prices
+
+
+# Cumulative returns, first price divided by last price , subtract 1
+def cumulative_returns(df: p.DataFrame):
+    return (df.iloc[-1] / df.iloc[0]) - 1
+
+    pass
+
+
+def average_daily_returns(df: p.DataFrame):
+    return df.mean()
+
+
+def std_daily_returns(df: p.DataFrame):
+    return df.std()
+
+
+def risk(df: p.DataFrame):
+    pass
+
+
+def sharp_ratio(df: p.DataFrame, sampling_rate, free_risk_return=0):
+    return math.sqrt(sampling_rate) * (average_daily_returns(df) - free_risk_return) / (std_daily_returns(df))

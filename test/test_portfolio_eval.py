@@ -1,10 +1,13 @@
 import matplotlib.pyplot as plt
 
 from src.ConfigManager import ConfigManager
-from src.Tools import load_resource, drop_volume, multistock, daily_returns, rolling_mean, bollinger_bands, \
-    portfolio_eval
+from src.Tools import load_resource, drop_volume, multistock, daily_returns, portfolio_eval, cumulative_returns, sharp_ratio
 
 config = ConfigManager('..\\src\\config.ini')
+
+yearly = 252
+weekly = 52
+monthly = 12
 
 # LOAD CSVs, return a dict with name
 df_dict = load_resource(config.source_folder)
@@ -13,6 +16,17 @@ drop_volume(df_dict)
 print('Labels : {}'.format(list(df_dict['GOOG'].columns)))
 agg_df = multistock(df_dict, 'Close')
 
-portfolio = portfolio_eval(agg_df, [.01,.01,.01,.99], 100000)
+portfolio = portfolio_eval(agg_df, [.25,.25,.25,.25], 100000)
+
+cum_ret = cumulative_returns(portfolio)
+
+for i in list(portfolio.columns):
+    portfolio[i] = daily_returns(portfolio[i])
+
+sr = sharp_ratio(portfolio,yearly)
 portfolio.plot()
+
+print('Sharp ratio: {}, Cumulative returns: {}'.format(sr, cum_ret))
+
+plt.legend(loc=1)
 plt.show()
