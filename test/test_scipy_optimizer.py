@@ -24,4 +24,15 @@ def test_run():
     plt.title('Minima of an objective function')
     plt.show()
 
+
+def error(line,data):
+
+    # line: tuple/list/array c0, c1, slope and y-intercept
+    # data: 2d array of point (x,y)
+
+    # err:  sum of squared differences , (Y' - Y)**2
+    err = np.sum((data[:,1]- (line[0] * data[:,0] + line[1])) ** 2 )
+    return  err
+
+
 test_run()
